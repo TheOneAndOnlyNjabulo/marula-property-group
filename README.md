@@ -73,9 +73,9 @@ the Triage Agent gets exactly one revision pass fed that feedback, and the corre
 run — draft, verdict, and final result — is logged to Neon regardless of outcome.
 
 **FAQ flow (`POST /chat`):** a separate, single-agent RAG chain over the same Pinecone index, used for general
-policy questions rather than ticket classification. Below a calibrated similarity threshold, or if the model
-itself signals the retrieved context doesn't answer the question, it returns a fixed "not found" response instead
-of generating from irrelevant context.
+policy questions rather than ticket classification. Every non-empty retrieval result is evaluated by the model
+against the supplied context. If the model signals that the context does not answer the question, it returns a
+fixed "not found" response instead of generating from irrelevant context.
 
 **Ingestion is offline**, not part of either live request path: a standalone script chunks every document in
 `docs/` along its own numbered section boundaries, embeds each chunk, and upserts it to Pinecone with metadata
@@ -83,11 +83,9 @@ of generating from irrelevant context.
 
 ## Key engineering decisions
 
-- **The confidence threshold was calibrated against this corpus, not carried over from a similar project.** An
-  earlier version of this pipeline (a different RAG chatbot, same technique) used a threshold of 0.62. Testing
-  that same value here against Marula's documents showed a different score distribution: out-of-domain questions
-  topped out at 0.627, in-domain questions scored 0.704+. The threshold here is 0.65, set from this corpus's own
-  measured gap.
+- **FAQ context sufficiency is decided from the retrieved policy text, not a fixed similarity cutoff.** Embedding
+  scores can be low for valid terse or misspelled questions, so the FAQ model receives every non-empty retrieval
+  result and must emit a dedicated sentinel when the supplied context cannot answer the question.
 - **A retrieval-completeness bug was found and fixed during testing, not assumed away.** The question "who pays
   for a blocked drain caused by grease" was retrieving a chunk that listed the example (§3, "improper disposal")
   but not the general principle that connects "tenant responsibility" to "tenant pays" (§1) — that section sat
