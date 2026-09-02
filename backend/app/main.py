@@ -10,6 +10,7 @@ from pydantic import BaseModel
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from app.agents import run_triage  # noqa: E402
+from app.db import log_ticket_run  # noqa: E402
 
 app = FastAPI(title="Marula Ticket Triage Assistant API")
 
@@ -60,7 +61,32 @@ def triage(body: TriageRequest) -> TriageResponse:
     try:
         run = run_triage(body.ticket_text)
     except Exception:
+        log_ticket_run(
+            ticket_text=body.ticket_text,
+            agent1_category=None,
+            agent1_priority=None,
+            agent1_draft=None,
+            auditor_verdict=None,
+            auditor_critique=None,
+            final_category=None,
+            final_priority=None,
+            final_response=None,
+            citations=[],
+        )
         raise HTTPException(status_code=502, detail="Failed to triage this ticket. Please try again.")
+
+    log_ticket_run(
+        ticket_text=run.ticket_text,
+        agent1_category=run.triage.category,
+        agent1_priority=run.triage.priority,
+        agent1_draft=run.triage.draft_reply,
+        auditor_verdict=run.auditor.verdict,
+        auditor_critique=run.auditor.critique,
+        final_category=run.final.category,
+        final_priority=run.final.priority,
+        final_response=run.final.draft_reply,
+        citations=run.citations,
+    )
 
     return TriageResponse(
         triage=TriageDraftResponse(**run.triage.__dict__),
