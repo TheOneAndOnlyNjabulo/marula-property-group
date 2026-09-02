@@ -18,6 +18,7 @@ app = FastAPI(title="Marula Ticket Triage Assistant API")
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["https://marula-property-group.vercel.app"],
     allow_origin_regex=r"http://localhost:\d+",
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
