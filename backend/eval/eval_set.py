@@ -9,10 +9,13 @@ expected_category / expected_priority are scored against the chain's FINAL outpu
 point of the two-agent design is that the first pass doesn't have to be perfect,
 so grading the first pass would be grading the wrong thing.
 
-Case 7 (bee swarm) is a deliberate regression case: it's the exact ticket that
-tripped up the Triage Agent's first pass during step 5 testing, caught and
-corrected by the Policy Auditor. Kept here specifically to make sure that
-correction keeps happening as the prompts evolve.
+Case 8 (bee swarm) is the exact ticket that tripped up the Triage Agent's first pass
+during step 5 manual testing (misclassified Emergency, corrected to Urgent by the
+Policy Auditor). Kept here as a regression case, but note the Triage Agent's first
+pass isn't deterministic - in the eval run committed alongside this file it was
+classified correctly on the first try (auditor_verdict: "approved"), where step 5's
+manual run got it wrong. Both are legitimate model behavior; this case just has a
+documented history of catching a real mistake once, so it stays in the set.
 """
 
 from dataclasses import dataclass

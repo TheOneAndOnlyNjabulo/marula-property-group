@@ -98,7 +98,11 @@ of generating from irrelevant context.
 - **The Policy Auditor's rejections are real, not staged.** During development, a ticket describing a bee swarm
   at the building entrance was first classified Emergency by the Triage Agent; the Auditor rejected it, citing
   the Pest Control Policy's explicit "Urgent, not Emergency" rule, and the revision pass produced the correct
-  classification. That exact ticket is kept in the eval set as a regression case.
+  classification. Verified again later with a different ticket ("entire unit has no power, neighbours' units are
+  fine") through the actual Ticketing UI and Admin UI, not just the API: Triage assigned Emergency, the Auditor
+  rejected it citing the Electrical Maintenance & Safety Policy's "total loss of power to a unit is Urgent" rule,
+  and both UIs rendered the rejected state correctly on the first real occurrence — the rejected-state styling had
+  not been exercised by an actual model rejection before that check.
 - **A 9/10 eval result is reported as 9/10, not rounded up in the write-up.** The one miss ("paint in the lobby is
   scuffed," expected `Common Area/Grounds`, classified `Structural/General Building`) is a genuine ambiguity in
   the category taxonomy itself — nothing in the docs disambiguates general building maintenance from common-area
@@ -116,6 +120,12 @@ cross-checked against the actual document text before being written into the eva
 | Category accuracy | 9/10 (90%) |
 | Priority accuracy | 10/10 (100%) |
 | Policy Auditor rejected and corrected the first pass | 2/10 (20%) |
+
+The rejection rate is from one run, not a stable measurement — generation isn't fully deterministic, so which
+tickets the Triage Agent misclassifies on its first pass varies between runs (the bee-swarm ticket used as the
+step 5 example elsewhere in this README was misclassified in that manual test but classified correctly in the
+eval run behind this table). The mechanic itself — the Auditor catching and correcting a wrong first pass when
+one occurs — is what's being demonstrated, not a fixed error rate.
 
 Scored against the chain's final output, after any Auditor-driven revision — the Auditor's role is to catch and
 correct a wrong first pass, so a corrected case counts as a system success. Full per-ticket breakdown, including
