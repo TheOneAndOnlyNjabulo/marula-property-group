@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -10,7 +11,7 @@ from pydantic import BaseModel
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from app.agents import run_triage  # noqa: E402
-from app.db import log_ticket_run  # noqa: E402
+from app.db import get_ticket_run, list_ticket_runs, log_ticket_run  # noqa: E402
 from app.rag_chain import answer_question  # noqa: E402
 
 app = FastAPI(title="Marula Ticket Triage Assistant API")
@@ -125,3 +126,43 @@ def chat(body: ChatRequest) -> ChatResponse:
         answer=result.answer,
         sources=[SourceResponse(document=s.document, section=s.section) for s in result.sources],
     )
+
+
+class TicketRunSummary(BaseModel):
+    id: str
+    ticket_text: str
+    agent1_category: str | None
+    agent1_priority: str | None
+    auditor_verdict: str | None
+    final_category: str | None
+    final_priority: str | None
+    created_at: datetime
+
+
+class TicketRunDetail(BaseModel):
+    id: str
+    ticket_text: str
+    agent1_category: str | None
+    agent1_priority: str | None
+    agent1_draft: str | None
+    auditor_verdict: str | None
+    auditor_critique: str | None
+    final_category: str | None
+    final_priority: str | None
+    final_response: str | None
+    citations: list[str]
+    created_at: datetime
+
+
+@app.get("/admin/tickets")
+def admin_list_tickets() -> list[TicketRunSummary]:
+    rows = list_ticket_runs()
+    return [TicketRunSummary(**{**row, "id": str(row["id"])}) for row in rows]
+
+
+@app.get("/admin/tickets/{ticket_id}")
+def admin_get_ticket(ticket_id: str) -> TicketRunDetail:
+    row = get_ticket_run(ticket_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Ticket run not found")
+    return TicketRunDetail(**{**row, "id": str(row["id"]), "citations": row["citations"] or []})

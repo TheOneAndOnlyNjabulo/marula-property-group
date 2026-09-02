@@ -1,3 +1,4 @@
+import type { TicketRunDetail, TicketRunSummary } from "@/lib/admin-types"
 import type { Source } from "@/lib/chat-types"
 import type { TriageResult } from "@/lib/triage-types"
 
@@ -64,5 +65,32 @@ export async function sendChatMessage(question: string): Promise<ChatApiResponse
     throw new ApiError(response.status, detail ?? "Failed to generate an answer. Please try again.")
   }
 
+  return response.json()
+}
+
+export async function fetchTicketRuns(): Promise<TicketRunSummary[]> {
+  if (!API_URL) {
+    throw new ApiError(0, "NEXT_PUBLIC_API_URL is not configured.")
+  }
+
+  const response = await fetch(`${API_URL}/admin/tickets`)
+  if (!response.ok) {
+    throw new ApiError(response.status, "Failed to load ticket runs.")
+  }
+  return response.json()
+}
+
+export async function fetchTicketRun(id: string): Promise<TicketRunDetail> {
+  if (!API_URL) {
+    throw new ApiError(0, "NEXT_PUBLIC_API_URL is not configured.")
+  }
+
+  const response = await fetch(`${API_URL}/admin/tickets/${id}`)
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      response.status === 404 ? "Ticket run not found." : "Failed to load ticket run."
+    )
+  }
   return response.json()
 }

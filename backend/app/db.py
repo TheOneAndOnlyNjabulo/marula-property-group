@@ -61,6 +61,38 @@ def log_ticket_run(
             return str(cur.fetchone()[0])
 
 
-# list_ticket_runs() / get_ticket_run() land in step 10 alongside the admin
-# endpoints that are their only caller - no point adding read paths before
-# anything uses them.
+def list_ticket_runs(limit: int = 50) -> list[dict]:
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                select id, ticket_text, agent1_category, agent1_priority, auditor_verdict,
+                       final_category, final_priority, created_at
+                from ticket_runs
+                order by created_at desc
+                limit %s
+                """,
+                (limit,),
+            )
+            columns = [desc[0] for desc in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def get_ticket_run(ticket_id: str) -> dict | None:
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                select id, ticket_text, agent1_category, agent1_priority, agent1_draft,
+                       auditor_verdict, auditor_critique,
+                       final_category, final_priority, final_response, citations, created_at
+                from ticket_runs
+                where id = %s
+                """,
+                (ticket_id,),
+            )
+            row = cur.fetchone()
+            if row is None:
+                return None
+            columns = [desc[0] for desc in cur.description]
+            return dict(zip(columns, row))

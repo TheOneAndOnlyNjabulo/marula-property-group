@@ -7,19 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ApiError, submitTicket } from "@/lib/api"
+import { priorityBadgeClass, verdictBadgeClass } from "@/lib/badge-utils"
 import type { TriageResult } from "@/lib/triage-types"
 import { cn } from "@/lib/utils"
-
-function priorityBadgeClass(priority: string) {
-  switch (priority) {
-    case "Emergency":
-      return "bg-destructive text-destructive-foreground"
-    case "Urgent":
-      return "bg-amber-500 text-white"
-    default:
-      return "bg-secondary text-secondary-foreground"
-  }
-}
 
 export function TicketForm() {
   const [ticketText, setTicketText] = React.useState("")
@@ -102,11 +92,7 @@ export function TicketForm() {
           <StageCard title="2. Policy Auditor — independent check">
             <div className="flex flex-wrap items-center gap-2">
               <Badge
-                className={
-                  result.auditor.verdict === "approved"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-destructive text-destructive-foreground"
-                }
+                className={verdictBadgeClass(result.auditor.verdict)}
               >
                 {result.auditor.verdict === "approved" ? "Approved" : "Rejected"}
               </Badge>
