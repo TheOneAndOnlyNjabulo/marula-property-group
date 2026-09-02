@@ -4,8 +4,8 @@ Manual test script for the FAQ chatbot chain - run via CLI:
     .venv/Scripts/python.exe scripts/test_rag_chain.py
 
 Includes a couple of in-scope questions and one deliberately out-of-scope
-question, to confirm both the confidence-threshold gate and the citation-aware
-prompt behave correctly before this is wired into the Chat UI.
+question, to confirm the context-validation sentinel and citation-aware prompt
+behave correctly before this is wired into the Chat UI.
 """
 
 import sys

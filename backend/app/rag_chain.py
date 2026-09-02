@@ -18,13 +18,6 @@ from app.retrieval import RetrievedChunk, retrieve
 
 GENERATION_MODEL = "gemini-3.5-flash-lite"
 
-# Below this cosine similarity, retrieval is treated as "found nothing relevant" and
-# the LLM is never called. Calibrated against this corpus specifically (Baobab's own
-# 0.62 doesn't transfer - different documents produce different score distributions):
-# out-of-domain questions (recipes, weather, unrelated topics) top out around 0.53-0.63,
-# while genuinely in-domain questions score 0.70-0.75. 0.65 sits in that gap.
-CONFIDENCE_THRESHOLD = 0.65
-
 NOT_FOUND_ANSWER = (
     "I couldn't find anything in Marula Property Group's policy documents that answers this "
     "question. Try rephrasing, or ask about maintenance priorities, SLA response times, "
@@ -33,10 +26,9 @@ NOT_FOUND_ANSWER = (
 )
 
 # Sentinel the model must emit verbatim (and only this) when the retrieved context
-# doesn't answer the question. The similarity threshold above catches queries where
-# nothing relevant was retrieved at all; it does NOT catch queries using in-domain
-# vocabulary that retrieve plausible-looking chunks but don't actually answer the
-# question. This second, post-generation check catches those.
+# doesn't answer the question. The model evaluates every non-empty retrieval result
+# instead of relying on a fixed similarity cutoff, which can reject valid short or
+# misspelled questions before the retrieved policy text is considered.
 INSUFFICIENT_CONTEXT_SENTINEL = "INSUFFICIENT_CONTEXT"
 
 SYSTEM_PROMPT = f"""You are the Marula Property Group Assistant, a support chatbot for Marula Property Group, a \
@@ -110,17 +102,15 @@ def _get_chain():
 def answer_question(question: str, top_k: int = 7) -> RagResult:
     chunks = retrieve(question, top_k=top_k)
 
-    if not chunks or chunks[0].score < CONFIDENCE_THRESHOLD:
-        # Skip the LLM entirely - nothing retrieved is relevant enough to answer
-        # from, and no sources are returned since none were actually usable.
+    if not chunks:
+        # No context exists for the model to evaluate.
         return RagResult(answer=NOT_FOUND_ANSWER, sources=[], chunk_ids=[])
 
     chain = _get_chain()
     answer = chain.invoke({"context": _format_context(chunks), "question": question})
 
     if answer.strip() == INSUFFICIENT_CONTEXT_SENTINEL:
-        # Threshold gate passed (in-domain vocabulary scored high enough to retrieve),
-        # but the model itself couldn't answer from what was retrieved - don't attach
+        # The model could not answer from the retrieved context, so do not attach
         # citations to a non-answer.
         return RagResult(answer=NOT_FOUND_ANSWER, sources=[], chunk_ids=[])
 
