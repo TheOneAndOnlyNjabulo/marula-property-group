@@ -11,6 +11,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from app.agents import run_triage  # noqa: E402
 from app.db import log_ticket_run  # noqa: E402
+from app.rag_chain import answer_question  # noqa: E402
 
 app = FastAPI(title="Marula Ticket Triage Assistant API")
 
@@ -93,4 +94,34 @@ def triage(body: TriageRequest) -> TriageResponse:
         auditor=AuditVerdictResponse(**run.auditor.__dict__),
         final=TriageDraftResponse(**run.final.__dict__),
         citations=run.citations,
+    )
+
+
+class ChatRequest(BaseModel):
+    question: str
+
+
+class SourceResponse(BaseModel):
+    document: str
+    section: str
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    sources: list[SourceResponse]
+
+
+@app.post("/chat")
+def chat(body: ChatRequest) -> ChatResponse:
+    if not body.question.strip():
+        raise HTTPException(status_code=422, detail="question must not be empty")
+
+    try:
+        result = answer_question(body.question)
+    except Exception:
+        raise HTTPException(status_code=502, detail="Failed to generate an answer. Please try again.")
+
+    return ChatResponse(
+        answer=result.answer,
+        sources=[SourceResponse(document=s.document, section=s.section) for s in result.sources],
     )
