@@ -73,9 +73,11 @@ the Triage Agent gets exactly one revision pass fed that feedback, and the corre
 run — draft, verdict, and final result — is logged to Neon regardless of outcome.
 
 **FAQ flow (`POST /chat`):** a separate, single-agent RAG chain over the same Pinecone index, used for general
-policy questions rather than ticket classification. Every non-empty retrieval result is evaluated by the model
-against the supplied context. If the model signals that the context does not answer the question, it returns a
-fixed "not found" response instead of generating from irrelevant context.
+policy questions rather than ticket classification. Two independent guardrails gate a generated answer: a
+calibrated similarity threshold skips the LLM entirely when nothing retrieved is relevant enough, and — for
+queries that clear that bar but still don't retrieve anything that actually answers the question — the model
+itself is instructed to signal that explicitly rather than guess, and a fixed "not found" response is returned
+instead of generating from irrelevant context.
 
 **Ingestion is offline**, not part of either live request path: a standalone script chunks every document in
 `docs/` along its own numbered section boundaries, embeds each chunk, and upserts it to Pinecone with metadata
@@ -83,9 +85,16 @@ fixed "not found" response instead of generating from irrelevant context.
 
 ## Key engineering decisions
 
-- **FAQ context sufficiency is decided from the retrieved policy text, not a fixed similarity cutoff.** Embedding
-  scores can be low for valid terse or misspelled questions, so the FAQ model receives every non-empty retrieval
-  result and must emit a dedicated sentinel when the supplied context cannot answer the question.
+- **A bare-keyword query bug shipped to production and was root-caused by testing, not guessing.** After
+  deployment, single-word/short-phrase questions ("popia", "pest control", "plumbing rules") were all returning
+  the "not found" fallback. The first hypothesis - that the similarity threshold was rejecting these because
+  short queries embed with lower confidence - was tested and falsified: all five failing queries scored 0.68-0.78,
+  comfortably above the 0.65 threshold, so they were already reaching the model. Inspecting the model's raw output
+  directly showed it was emitting the `INSUFFICIENT_CONTEXT` sentinel itself, because the system prompt framed
+  the task as "answer the user's question" and a bare keyword isn't phrased as one. The actual fix was a prompt
+  rule telling the model to treat a bare topic as a "tell me about X" request; verified against all five
+  originally-failing queries plus the out-of-domain control case, with the similarity threshold left in place as
+  an independent, cheaper guardrail against fully off-topic input.
 - **A retrieval-completeness bug was found and fixed during testing, not assumed away.** The question "who pays
   for a blocked drain caused by grease" was retrieving a chunk that listed the example (§3, "improper disposal")
   but not the general principle that connects "tenant responsibility" to "tenant pays" (§1) — that section sat

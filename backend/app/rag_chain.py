@@ -18,6 +18,16 @@ from app.retrieval import RetrievedChunk, retrieve
 
 GENERATION_MODEL = "gemini-3.5-flash-lite"
 
+# Below this cosine similarity, retrieval is treated as "found nothing relevant" and
+# the LLM is never called. Calibrated against this corpus specifically (Baobab's own
+# 0.62 doesn't transfer - different documents produce different score distributions):
+# out-of-domain questions (recipes, weather, unrelated topics) top out around 0.53-0.63,
+# while genuinely in-domain questions score 0.68+ - including short/misspelled ones (a
+# bare "popia" or "maitanance priority" still scores 0.7-0.78, since Gemini's embeddings
+# are robust to that; see the sentinel note below for what WAS actually failing on those).
+# 0.65 sits in that gap.
+CONFIDENCE_THRESHOLD = 0.65
+
 NOT_FOUND_ANSWER = (
     "I couldn't find anything in Marula Property Group's policy documents that answers this "
     "question. Try rephrasing, or ask about maintenance priorities, SLA response times, "
@@ -26,9 +36,13 @@ NOT_FOUND_ANSWER = (
 )
 
 # Sentinel the model must emit verbatim (and only this) when the retrieved context
-# doesn't answer the question. The model evaluates every non-empty retrieval result
-# instead of relying on a fixed similarity cutoff, which can reject valid short or
-# misspelled questions before the retrieved policy text is considered.
+# doesn't answer the question. The similarity threshold above catches queries where
+# nothing relevant was retrieved at all; it does NOT catch queries using in-domain
+# vocabulary that retrieve plausible-looking chunks but don't actually answer the
+# question - or, as found in testing, bare-keyword queries ("popia", "pest control")
+# that scored well above threshold but were still refused by the model because the
+# prompt originally framed the task as "answer the question" and a keyword isn't
+# phrased as one. See the system prompt's explicit rule about bare topics below.
 INSUFFICIENT_CONTEXT_SENTINEL = "INSUFFICIENT_CONTEXT"
 
 SYSTEM_PROMPT = f"""You are the Marula Property Group Assistant, a support chatbot for Marula Property Group, a \
@@ -107,16 +121,17 @@ def _get_chain():
 def answer_question(question: str, top_k: int = 7) -> RagResult:
     chunks = retrieve(question, top_k=top_k)
 
-    if not chunks:
-        # No context exists for the model to evaluate.
+    if not chunks or chunks[0].score < CONFIDENCE_THRESHOLD:
+        # Skip the LLM entirely - nothing retrieved is relevant enough to answer
+        # from, and no sources are returned since none were actually usable.
         return RagResult(answer=NOT_FOUND_ANSWER, sources=[], chunk_ids=[])
 
     chain = _get_chain()
     answer = chain.invoke({"context": _format_context(chunks), "question": question})
 
     if answer.strip() == INSUFFICIENT_CONTEXT_SENTINEL:
-        # The model could not answer from the retrieved context, so do not attach
-        # citations to a non-answer.
+        # Threshold gate passed (retrieval scored high enough), but the model itself
+        # couldn't answer from what was retrieved - don't attach citations to a non-answer.
         return RagResult(answer=NOT_FOUND_ANSWER, sources=[], chunk_ids=[])
 
     return RagResult(
