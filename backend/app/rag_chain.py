@@ -50,6 +50,11 @@ the context does not state.
 context's "improper disposal (grease, foreign objects)"). If the context clearly covers the situation asked \
 about, even via a specific example rather than the exact phrase used in the question, answer from it - do not \
 withhold an answer just because the wording doesn't match verbatim.
+- The input may be a bare topic or keyword rather than a full question (e.g. "popia", "pest control", "plumbing \
+rules") - treat that as a request to summarize the relevant policy from the context, the same as if the user had \
+asked "tell me about" that topic, rather than treating it as too vague to answer. Only use the \
+insufficient-context response below when the context itself doesn't cover the topic, not because the input \
+wasn't phrased as a question.
 - When you state a specific fact (a timeframe, priority tier, category, or requirement), name the document it \
 comes from, e.g. "(See the SLA Response & Resolution Times document.)"
 - If the context does not contain enough information to answer the question, respond with EXACTLY this and \
