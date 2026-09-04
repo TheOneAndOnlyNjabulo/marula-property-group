@@ -14,11 +14,11 @@ retrieval pipeline.
 
 ## Why this exists
 
-This is a portfolio project built to demonstrate a specific pattern: a system where one LLM agent's output is
-independently checked by a second agent, grounded in retrieval, before it's accepted — rather than a single
-agent's output being trusted outright. The Ticketing and Admin UIs exist to make that check visible: every run
-shows the first-pass classification, the Auditor's verdict, and the final result, so the mechanic isn't just
-happening somewhere in a log file.
+This project demonstrates a specific pattern: a system where one LLM agent's output is independently checked by
+a second agent, grounded in retrieval, before it's accepted — rather than a single agent's output being trusted
+outright. The Ticketing and Admin UIs exist to make that check visible: every run shows the first-pass
+classification, the Auditor's verdict, and the final result, so the mechanic isn't just happening somewhere in a
+log file.
 
 ## Architecture
 

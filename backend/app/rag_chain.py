@@ -19,8 +19,9 @@ from app.retrieval import RetrievedChunk, retrieve
 GENERATION_MODEL = "gemini-3.5-flash-lite"
 
 # Below this cosine similarity, retrieval is treated as "found nothing relevant" and
-# the LLM is never called. Calibrated against this corpus specifically (Baobab's own
-# 0.62 doesn't transfer - different documents produce different score distributions):
+# the LLM is never called. Calibrated against this corpus specifically - a threshold
+# from a different corpus doesn't transfer, since different documents produce
+# different score distributions:
 # out-of-domain questions (recipes, weather, unrelated topics) top out around 0.53-0.63,
 # while genuinely in-domain questions score 0.68+ - including short/misspelled ones (a
 # bare "popia" or "maitanance priority" still scores 0.7-0.78, since Gemini's embeddings
