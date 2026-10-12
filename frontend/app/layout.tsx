@@ -1,3 +1,4 @@
+import type { Viewport } from "next"
 import { Bricolage_Grotesque, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
@@ -10,6 +11,13 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+
+// viewportFit "cover" lets the mobile bottom tab bar pad itself clear of the
+// iPhone home indicator via env(safe-area-inset-bottom).
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: "#ffffff",
+}
 
 export default function RootLayout({
   children,
