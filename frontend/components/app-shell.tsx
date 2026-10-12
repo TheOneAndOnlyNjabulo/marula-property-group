@@ -11,8 +11,8 @@ import { useBackendStatus } from "@/hooks/use-backend-status"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
-  { href: "/", label: "Submit a Ticket", shortLabel: "Ticket", icon: Wrench },
-  { href: "/chat", label: "Ask a Question", shortLabel: "Chat", icon: MessageCircleQuestion },
+  { href: "/", label: "Submit a Ticket", icon: Wrench },
+  { href: "/chat", label: "Ask a Question", icon: MessageCircleQuestion },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -23,87 +23,62 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const showStatus = backendStatus === "waking" || backendStatus === "unreachable"
 
   return (
-    <div className="flex h-svh flex-col md:flex-row">
-      {/* Desktop sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
-        <div className="flex items-center gap-2 px-5 py-6">
-          <Trees className="size-6 text-primary" strokeWidth={1.75} aria-hidden="true" />
-          <div>
-            <div className="text-sm font-bold tracking-tight">Marula</div>
-            <div className="text-[11px] text-muted-foreground">Property Group</div>
+    <div className="flex h-svh flex-col bg-background">
+      {/* Flat header: no borders or shadow - whitespace and the pill nav do the separating */}
+      <header className="shrink-0 pt-4">
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Trees className="size-4.5" strokeWidth={2} aria-hidden="true" />
+            </span>
+            <div className="leading-tight">
+              <div className="text-sm font-extrabold tracking-tight">Marula</div>
+              <div className="text-[11px] font-medium text-muted-foreground">Property Group</div>
+            </div>
+          </Link>
+
+          <nav className="order-last -mx-1 flex w-full gap-1 overflow-x-auto px-1 sm:order-none sm:w-auto">
+            {NAV_ITEMS.map((item) => {
+              const active = pathname === item.href
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors",
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <span className="hidden rounded-full bg-muted px-3 py-1 text-[11px] font-semibold text-muted-foreground lg:inline">
+              Maintenance helpdesk
+            </span>
+            <ThemeToggle />
           </div>
         </div>
-
-        <nav className="flex flex-col gap-0.5 px-3">
-          {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
-                  active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                )}
-              >
-                <Icon className="size-4" strokeWidth={1.75} aria-hidden="true" />
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
-
-        <div className="mt-auto flex items-center justify-between border-t border-sidebar-border px-5 py-4">
-          <span className="text-[11px] text-muted-foreground">Maintenance helpdesk</span>
-          <ThemeToggle />
-        </div>
-      </aside>
-
-      {/* Mobile top bar */}
-      <header className="flex items-center justify-between border-b border-border/70 px-4 py-3 md:hidden">
-        <div className="flex items-center gap-2">
-          <Trees className="size-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
-          <span className="text-sm font-bold tracking-tight">Marula Property Group</span>
-        </div>
-        <ThemeToggle />
       </header>
 
-      {/* Main content - a bounded viewport; each page owns its own scroll region within it */}
-      <main className="flex flex-1 flex-col overflow-hidden pb-16 md:pb-0">
+      {/* Main content - a bounded viewport; each page owns its own scroll region
+          within it, and caps its own content at max-w-7xl (matching the header) so
+          wide screens get side margins while scrollbars stay at the window edge. */}
+      <main className="flex flex-1 flex-col overflow-hidden">
         {showStatus && (
-          <div className="shrink-0 px-4 pt-4 md:px-6">
+          <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pt-4 sm:px-6">
             <ServerStatusBanner status={backendStatus} />
           </div>
         )}
         {children}
       </main>
-
-      {/* Mobile bottom tab bar */}
-      <nav
-        className="fixed inset-x-0 bottom-0 z-10 flex border-t border-border/70 bg-background/95 backdrop-blur md:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      >
-        {NAV_ITEMS.map((item) => {
-          const active = pathname === item.href
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] transition-colors",
-                active ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              <Icon className="size-5" strokeWidth={active ? 2.25 : 1.75} aria-hidden="true" />
-              {item.shortLabel}
-            </Link>
-          )
-        })}
-      </nav>
     </div>
   )
 }

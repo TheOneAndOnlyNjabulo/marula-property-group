@@ -25,7 +25,7 @@ export default function AdminTicketDetailPage() {
   return (
     <AppShell>
       <div className="h-full overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-6 py-8">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6">
           <Link
             href="/admin"
             className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -47,7 +47,7 @@ export default function AdminTicketDetailPage() {
 
           {run && (
             <div className="flex flex-col gap-4">
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="rounded-3xl bg-card p-5">
                 <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                   Original ticket
                 </h2>
@@ -107,7 +107,7 @@ export default function AdminTicketDetailPage() {
 
 function StageCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
+    <div className="flex flex-col gap-2 rounded-3xl bg-card p-5">
       <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{title}</h2>
       {children}
     </div>

@@ -23,9 +23,9 @@ export default function AdminPage() {
   return (
     <AppShell>
       <div className="h-full overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 py-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-8 sm:px-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Ticket runs</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Ticket runs</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Every triage run, with the Triage Agent&apos;s first pass and the Policy Auditor&apos;s verdict.
             </p>
@@ -53,7 +53,7 @@ export default function AdminPage() {
                 <Link
                   key={run.id}
                   href={`/admin/${run.id}`}
-                  className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
+                  className="flex flex-col gap-2 rounded-3xl bg-card p-5 transition-colors hover:bg-accent"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">{run.agent1_category ?? "—"}</Badge>

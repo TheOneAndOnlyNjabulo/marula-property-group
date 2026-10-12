@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Send } from "lucide-react"
+import { MessageCircleQuestion, Send } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 
+import { PageHeader } from "@/components/page-header"
 import { SlowRequestHint } from "@/components/server-status"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -76,7 +77,16 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col overflow-hidden">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col overflow-hidden">
+      <PageHeader
+        accent="chat"
+        icon={MessageCircleQuestion}
+        eyebrow="Retrieval-augmented"
+        title="Ask a Question"
+        description="Ask about maintenance priorities, SLA times, trades, or tenant vs. landlord responsibility - answered and cited from Marula's policy documents."
+      />
+
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col overflow-hidden">
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
         <div className="flex flex-col gap-4">
           {messages.map((message) => (
@@ -92,7 +102,7 @@ export function ChatInterface() {
                     setInput(question)
                     inputRef.current?.focus()
                   }}
-                  className="rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="rounded-full bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
                   {question}
                 </button>
@@ -108,8 +118,8 @@ export function ChatInterface() {
         </div>
       </div>
 
-      <div className="border-t border-border/70 px-4 py-3">
-        <div className="flex items-center gap-2">
+      <div className="px-4 pt-2 pb-4">
+        <div className="flex items-center gap-2 rounded-full bg-muted p-1.5 pl-2">
           <Input
             ref={inputRef}
             value={input}
@@ -118,11 +128,13 @@ export function ChatInterface() {
             placeholder="Ask a question..."
             disabled={isSending}
             aria-label="Your question"
+            className="bg-transparent focus-visible:ring-0"
           />
           <Button onClick={handleSend} disabled={!canSend} size="icon" aria-label="Send">
             <Send className="size-4" />
           </Button>
         </div>
+      </div>
       </div>
     </div>
   )
@@ -132,7 +144,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "error") {
     return (
       <div className="flex flex-col items-start">
-        <div className="max-w-[85%] rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm leading-relaxed text-destructive">
+        <div className="max-w-[85%] rounded-3xl bg-destructive/10 px-5 py-3 text-sm leading-relaxed text-destructive">
           {message.content}
         </div>
       </div>
@@ -145,10 +157,10 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
-          "max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed",
+          "max-w-[85%] rounded-3xl px-5 py-3 text-sm leading-relaxed",
           isUser
-            ? "bg-primary text-primary-foreground whitespace-pre-wrap"
-            : "border border-border/60 bg-card text-card-foreground"
+            ? "rounded-br-lg bg-primary text-primary-foreground whitespace-pre-wrap"
+            : "rounded-bl-lg bg-card text-card-foreground"
         )}
       >
         {isUser ? message.content : <MarkdownContent content={message.content} />}
@@ -158,9 +170,9 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           {message.sources.map((s) => (
             <span
               key={`${s.document}-${s.section}`}
-              className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+              className="rounded-full bg-muted px-2.5 py-1 font-mono text-[10px] text-muted-foreground"
             >
-              {s.document} <span className="text-primary">§{s.section}</span>
+              {s.document} <span className="font-semibold text-foreground">§{s.section}</span>
             </span>
           ))}
         </div>
@@ -195,7 +207,7 @@ function MarkdownContent({ content }: { content: string }) {
 function TypingIndicator() {
   return (
     <div className="flex items-start">
-      <div className="flex items-center gap-1 rounded-2xl border border-border/60 bg-card px-4 py-3">
+      <div className="flex items-center gap-1 rounded-3xl rounded-bl-lg bg-card px-5 py-4">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
