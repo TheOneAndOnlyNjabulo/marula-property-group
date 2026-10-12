@@ -6,6 +6,8 @@ classification against the company's actual policy documents and can reject and 
 A tenant-facing FAQ chatbot and an internal admin view sit alongside it, sharing the same document corpus and
 retrieval pipeline.
 
+**Live demo:** https://marula-property-group.vercel.app/
+
 > **Marula Property Group is entirely fictional.** The company, its policies, trades, and every document in
 > [`docs/`](./docs) were invented for this project. None of it describes a real business, and nothing in it is
 > real property management, legal, or safety advice.
@@ -24,13 +26,13 @@ log file.
 
 ```mermaid
 flowchart LR
-    subgraph Frontend["Next.js — Ticketing / Chat / Admin UI"]
+    subgraph Frontend["Next.js on Vercel — Ticketing / Chat / Admin UI"]
         TicketUI[Ticketing UI]
         ChatUI[Chat UI]
         AdminUI[Admin UI]
     end
 
-    subgraph Backend["FastAPI"]
+    subgraph Backend["FastAPI on Render"]
         TriageAPI["/triage"]
         ChatAPI["/chat"]
         AdminAPI["/admin/tickets"]
@@ -143,8 +145,8 @@ Re-run it yourself with `cd backend && python scripts/eval.py`.
 
 | Layer | Choice |
 |---|---|
-| Frontend | Next.js (TypeScript) + Tailwind + shadcn/ui |
-| Backend | Python + FastAPI |
+| Frontend | Next.js (TypeScript) + Tailwind + shadcn/ui, deployed on Vercel |
+| Backend | Python + FastAPI, deployed on Render |
 | Orchestration | LangChain — structured-output agent chains |
 | Generation | Gemini (`gemini-3.5-flash-lite`) |
 | Embeddings | Gemini (`gemini-embedding-001`) |
@@ -225,8 +227,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```bash
 npm run dev
 ```
-
-This project runs locally; it is not currently deployed.
 
 ## API
 
