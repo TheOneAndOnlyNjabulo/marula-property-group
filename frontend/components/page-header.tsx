@@ -19,7 +19,7 @@ export function PageHeader({
   accent?: ModuleAccent
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-wrap items-end justify-between gap-4 px-4 pt-6 pb-5 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl animate-rise flex-wrap items-end justify-between gap-4 px-4 pt-6 pb-5 sm:px-6">
       <div className="flex items-start gap-4">
         <div
           className={cn(

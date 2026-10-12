@@ -28,7 +28,7 @@ export function SamplePicker({
             type="button"
             onClick={() => onPick(sample.value)}
             disabled={disabled}
-            className="rounded-full bg-background px-3.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:opacity-50"
+            className="rounded-full bg-background px-3.5 py-1.5 text-xs font-semibold text-foreground transition-[color,background-color,transform] hover:bg-primary active:scale-95 hover:text-primary-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:opacity-50"
           >
             {sample.label}
           </button>
@@ -54,7 +54,7 @@ export function HowItWorks({
   return (
     <div
       className={cn(
-        "relative w-full max-w-lg overflow-hidden rounded-3xl p-6 text-left text-on-accent sm:p-8",
+        "relative w-full max-w-lg animate-pop overflow-hidden rounded-3xl p-6 text-left text-on-accent sm:p-8",
         ACCENT_BG[accent]
       )}
     >
@@ -65,7 +65,7 @@ export function HowItWorks({
       <h2 className="relative text-sm font-bold tracking-wide uppercase">
         How it works
       </h2>
-      <ol className="relative mt-5 flex flex-col gap-4">
+      <ol className="stagger relative mt-5 flex flex-col gap-4">
         {steps.map((step, index) => (
           <li key={step} className="flex gap-4">
             <span className="w-8 shrink-0 text-2xl leading-none font-extrabold tabular-nums">

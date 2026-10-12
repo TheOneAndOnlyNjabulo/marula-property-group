@@ -41,7 +41,7 @@ export function BottomNav({ items }: { items: BottomNavItem[] }) {
                 className={cn(
                   "flex h-8 w-14 items-center justify-center rounded-full transition-colors",
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "animate-pop bg-primary text-primary-foreground"
                     : "text-muted-foreground"
                 )}
               >

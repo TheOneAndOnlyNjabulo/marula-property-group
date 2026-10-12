@@ -48,7 +48,7 @@ export default function AdminPage() {
           )}
 
           {runs && runs.length > 0 && (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {runs.map((run) => (
                 <Link
                   key={run.id}

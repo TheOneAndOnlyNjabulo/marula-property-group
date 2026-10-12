@@ -75,7 +75,7 @@ export function TicketForm() {
         description="Describe what's wrong. Your ticket is triaged automatically, then independently checked against Marula's policy documents before you get a response."
       />
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4 sm:px-6 sm:pb-6 md:flex-row md:overflow-hidden">
+      <div className="stagger flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4 sm:px-6 sm:pb-6 md:flex-row md:overflow-hidden">
         {/* Section 1: ticket intake */}
         <div className="shrink-0 rounded-3xl bg-card p-5 md:w-[26rem] md:overflow-y-auto">
           <div className="flex flex-col gap-3">
@@ -121,7 +121,7 @@ export function TicketForm() {
           )}
 
           {result && (
-            <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            <div className="stagger mx-auto flex max-w-2xl flex-col gap-3">
               <StageCard index={1} title="Triage Agent — first pass">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline">{result.triage.category}</Badge>

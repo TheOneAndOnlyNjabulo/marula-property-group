@@ -102,7 +102,7 @@ export function ChatInterface() {
                     setInput(question)
                     inputRef.current?.focus()
                   }}
-                  className="rounded-full bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  className="rounded-full bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition-[color,background-color,transform] hover:bg-primary active:scale-95 hover:text-primary-foreground"
                 >
                   {question}
                 </button>
@@ -143,7 +143,7 @@ export function ChatInterface() {
 function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "error") {
     return (
-      <div className="flex flex-col items-start">
+      <div className="flex animate-rise flex-col items-start">
         <div className="max-w-[85%] rounded-3xl bg-destructive/10 px-5 py-3 text-sm leading-relaxed text-destructive">
           {message.content}
         </div>
@@ -154,7 +154,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user"
 
   return (
-    <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
+    <div className={cn("flex animate-rise flex-col", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
           "max-w-[85%] rounded-3xl px-5 py-3 text-sm leading-relaxed",
@@ -206,7 +206,7 @@ function MarkdownContent({ content }: { content: string }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex items-start">
+    <div className="flex animate-rise items-start">
       <div className="flex items-center gap-1 rounded-3xl rounded-bl-lg bg-card px-5 py-4">
         {[0, 1, 2].map((i) => (
           <span
