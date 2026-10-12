@@ -4,6 +4,7 @@ import * as React from "react"
 import { Send } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 
+import { SlowRequestHint } from "@/components/server-status"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { ChatMessage } from "@/lib/chat-types"
@@ -20,6 +21,14 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   },
 ]
 
+// Picking one only fills the input - the visitor reads/edits it and sends it.
+const SAMPLE_QUESTIONS = [
+  "What counts as an emergency maintenance request?",
+  "Who pays for a blocked drain caused by grease going down the sink?",
+  "How quickly will an urgent ticket get a response?",
+  "pest control",
+]
+
 function nextId() {
   return Math.random().toString(36).slice(2)
 }
@@ -29,6 +38,7 @@ export function ChatInterface() {
   const [input, setInput] = React.useState("")
   const [isSending, setIsSending] = React.useState(false)
   const scrollRef = React.useRef<HTMLDivElement>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
@@ -72,13 +82,36 @@ export function ChatInterface() {
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
-          {isSending && <TypingIndicator />}
+          {messages.length === INITIAL_MESSAGES.length && !isSending && (
+            <div className="flex flex-wrap gap-1.5">
+              {SAMPLE_QUESTIONS.map((question) => (
+                <button
+                  key={question}
+                  type="button"
+                  onClick={() => {
+                    setInput(question)
+                    inputRef.current?.focus()
+                  }}
+                  className="rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          )}
+          {isSending && (
+            <div className="flex flex-col gap-2">
+              <TypingIndicator />
+              <SlowRequestHint />
+            </div>
+          )}
         </div>
       </div>
 
       <div className="border-t border-border/70 px-4 py-3">
         <div className="flex items-center gap-2">
           <Input
+            ref={inputRef}
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}

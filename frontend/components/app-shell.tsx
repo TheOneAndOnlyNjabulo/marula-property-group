@@ -5,7 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { MessageCircleQuestion, Trees, Wrench } from "lucide-react"
 
+import { ServerStatusBanner } from "@/components/server-status"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useBackendStatus } from "@/hooks/use-backend-status"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
@@ -15,6 +17,10 @@ const NAV_ITEMS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  // Mounted once here, not per page, so the backend starts waking on whichever
+  // page a visitor lands on.
+  const backendStatus = useBackendStatus()
+  const showStatus = backendStatus === "waking" || backendStatus === "unreachable"
 
   return (
     <div className="flex h-svh flex-col md:flex-row">
@@ -66,7 +72,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main content - a bounded viewport; each page owns its own scroll region within it */}
-      <main className="flex flex-1 flex-col overflow-hidden pb-16 md:pb-0">{children}</main>
+      <main className="flex flex-1 flex-col overflow-hidden pb-16 md:pb-0">
+        {showStatus && (
+          <div className="shrink-0 px-4 pt-4 md:px-6">
+            <ServerStatusBanner status={backendStatus} />
+          </div>
+        )}
+        {children}
+      </main>
 
       {/* Mobile bottom tab bar */}
       <nav

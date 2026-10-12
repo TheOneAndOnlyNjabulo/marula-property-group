@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ClipboardList, Loader2, Send } from "lucide-react"
 
+import { SlowRequestHint } from "@/components/server-status"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,6 +11,31 @@ import { ApiError, submitTicket } from "@/lib/api"
 import { priorityBadgeClass, verdictBadgeClass } from "@/lib/badge-utils"
 import type { TriageResult } from "@/lib/triage-types"
 import { cn } from "@/lib/utils"
+
+// Drawn from the eval set (backend/eval/eval_set.py), one per priority tier, so
+// each is known to exercise the triage + audit path. Picking one only fills the
+// textarea - the visitor still submits it themselves.
+const SAMPLE_TICKETS = [
+  { label: "Burst pipe", text: "There is a burst pipe flooding my bathroom right now, water everywhere!" },
+  {
+    label: "No hot water",
+    text: "There's no hot water in my unit since this morning. The geyser itself doesn't look like it's leaking.",
+  },
+  {
+    label: "Sparking socket",
+    text: "I can smell burning and see sparks coming from the wall socket in my lounge.",
+  },
+  {
+    label: "Dripping tap",
+    text: "My kitchen tap has been dripping constantly for the past two weeks, it's not urgent but it's annoying.",
+  },
+]
+
+const HOW_IT_WORKS = [
+  "The Triage Agent classifies the ticket (category, priority, SLA) and drafts a reply.",
+  "The Policy Auditor retrieves the relevant policy sections and independently checks that classification.",
+  "If the Auditor rejects it, the ticket is revised using the cited correction before the final result is returned.",
+]
 
 export function TicketForm() {
   const [ticketText, setTicketText] = React.useState("")
@@ -49,6 +75,20 @@ export function TicketForm() {
         </p>
 
         <div className="mt-6 flex flex-col gap-3">
+          <div className="flex flex-wrap gap-1.5">
+            <span className="self-center text-xs text-muted-foreground">Try a sample:</span>
+            {SAMPLE_TICKETS.map((sample) => (
+              <button
+                key={sample.label}
+                type="button"
+                onClick={() => setTicketText(sample.text)}
+                disabled={isSubmitting}
+                className="rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+              >
+                {sample.label}
+              </button>
+            ))}
+          </div>
           <Textarea
             value={ticketText}
             onChange={(event) => setTicketText(event.target.value)}
@@ -68,6 +108,7 @@ export function TicketForm() {
               </>
             )}
           </Button>
+          {isSubmitting && <SlowRequestHint />}
         </div>
 
         {error && (
@@ -86,6 +127,14 @@ export function TicketForm() {
               The Triage Agent&apos;s draft, the Policy Auditor&apos;s verdict, and the final result will appear
               here once you submit a ticket.
             </p>
+            <div className="mt-4 max-w-sm rounded-xl border border-border bg-card p-4 text-left">
+              <h2 className="text-xs font-semibold tracking-wide uppercase">How it works</h2>
+              <ol className="mt-2 flex list-decimal flex-col gap-1.5 pl-4 text-xs leading-relaxed">
+                {HOW_IT_WORKS.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </div>
           </div>
         )}
 
