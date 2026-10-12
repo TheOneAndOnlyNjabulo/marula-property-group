@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -13,6 +13,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 from app.agents import run_triage  # noqa: E402
 from app.db import get_ticket_run, list_ticket_runs, log_ticket_run  # noqa: E402
 from app.rag_chain import answer_question  # noqa: E402
+from app.rate_limit import enforce_rate_limit  # noqa: E402
 
 app = FastAPI(title="Marula Ticket Triage Assistant API")
 
@@ -56,7 +57,7 @@ class TriageResponse(BaseModel):
     citations: list[str]
 
 
-@app.post("/triage")
+@app.post("/triage", dependencies=[Depends(enforce_rate_limit)])
 def triage(body: TriageRequest) -> TriageResponse:
     if not body.ticket_text.strip():
         raise HTTPException(status_code=422, detail="ticket_text must not be empty")
@@ -113,7 +114,7 @@ class ChatResponse(BaseModel):
     sources: list[SourceResponse]
 
 
-@app.post("/chat")
+@app.post("/chat", dependencies=[Depends(enforce_rate_limit)])
 def chat(body: ChatRequest) -> ChatResponse:
     if not body.question.strip():
         raise HTTPException(status_code=422, detail="question must not be empty")

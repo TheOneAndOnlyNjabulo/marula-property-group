@@ -258,4 +258,9 @@ npm run dev
 
 `GET /admin/tickets` returns a summary list of past ticket runs; `GET /admin/tickets/{id}` returns the full audit
 trail for one. Neither endpoint requires authentication — this is an internal-tool demo, not a public-facing
-surface, and there is no rate limiting on any endpoint for the same reason.
+surface.
+
+`/triage` and `/chat` share one rate limit: 10 requests per IP per rolling 24 hours, since both draw on the same
+Gemini quota. The IP is derived server-side (`X-Forwarded-For`), and attempts are counted in a small
+`rate_limit_hits` table in Neon (created on first use). Returns 429 once exhausted; the admin endpoints are not
+limited.
